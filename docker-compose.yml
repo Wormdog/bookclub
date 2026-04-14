@@ -1,0 +1,71 @@
+version: "3.9"
+ 
+services:
+ 
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+ 
+  backend:
+    build: ./backend
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:  postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY:    ${SECRET_KEY}
+      INVITE_CODE:   ${INVITE_CODE}
+      MAIL_FROM:     ${MAIL_FROM}
+      MAIL_USER:     ${MAIL_USER}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      APP_BASE_URL:  ${APP_BASE_URL}
+    depends_on:
+      - db
+    networks:
+      - internal
+    
+    
+ 
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    networks:
+      - internal
+ 
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - internal
+      - tunnel
+ 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    networks:
+      - tunnel
+ 
+networks:
+  internal:
+    internal: true
+  tunnel:
+ 
+volumes:
+  postgres_data:
