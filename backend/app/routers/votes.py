@@ -20,20 +20,38 @@ def _get_active_round(db: Session):
 def nominate(nom: NominationCreate, db: Session = Depends(get_db),
              current_user=Depends(get_current_user)):
     round_obj = _get_active_round(db)
+    
     if round_obj.status == models.RoundStatus.tiebreak:
         raise HTTPException(400, "Voting is in tiebreak — nominations are closed.")
+
+    # 1. Check if user already participated (voted or nominated)
     if db.query(models.Vote).filter(
             models.Vote.user_id == current_user.id,
             models.Vote.round_id == round_obj.id).first():
-        raise HTTPException(400, "You already voted this round — you cannot also nominate.")
-    if db.query(models.Nomination).filter(
-            models.Nomination.user_id == current_user.id,
-            models.Nomination.round_id == round_obj.id).first():
-        raise HTTPException(400, "You already nominated a book this round.")
+        raise HTTPException(400, "You already participated in this round.")
+
+    # 2. Create the nomination
     new_nom = models.Nomination(
-        **nom.model_dump(), user_id=current_user.id, round_id=round_obj.id)
-    db.add(new_nom); db.commit(); db.refresh(new_nom)
-    new_nom.vote_count = 0
+        **nom.model_dump(), 
+        user_id=current_user.id, 
+        round_id=round_obj.id
+    )
+    db.add(new_nom)
+    db.flush() # Flush to get the new_nom.id before committing
+
+    # 3. Automatically assign the nominator's vote to this book
+    auto_vote = models.Vote(
+        user_id=current_user.id,
+        nomination_id=new_nom.id,
+        round_id=round_obj.id
+    )
+    db.add(auto_vote)
+    
+    db.commit()
+    db.refresh(new_nom)
+    
+    # Set count to 1 for the response since they just voted for it
+    new_nom.vote_count = 1 
     return new_nom
  
 @router.get("/nominations", response_model=list[NominationOut])
@@ -70,12 +88,6 @@ def vote(vote_in: VoteCreate, db: Session = Depends(get_db),
         if not participated:
             raise HTTPException(403,
                 "Only members who participated in the original round can vote in the tiebreak.")
-    if round_obj.status == models.RoundStatus.open:
-        if db.query(models.Nomination).filter(
-                models.Nomination.user_id == current_user.id,
-                models.Nomination.round_id == round_obj.id).first():
-            raise HTTPException(400,
-                "You nominated a book this round — you cannot also vote.")
     if db.query(models.Vote).filter(
             models.Vote.user_id == current_user.id,
             models.Vote.round_id == round_obj.id).first():
