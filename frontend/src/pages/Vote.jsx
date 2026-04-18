@@ -54,12 +54,22 @@ export default function Vote() {
             {nom.cover_url && <img src={nom.cover_url} alt="cover"
               style={{ width:50, height:70, objectFit:"cover" }} />}
             <div style={{ flex:1 }}>
-              <strong>{nom.title}</strong><br />
-              <span style={{ color:"#555" }}>{nom.author}</span><br />
-              <span style={{ color:"#888", fontSize:13 }}>
-                {nom.vote_count} vote{nom.vote_count !== 1 ? "s" : ""}
-              </span>
-            </div>
+              <a 
+                  href={`https://openlibrary.org/works/${nom.ol_work_id}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: "#1565c0", textDecoration: "none" }}
+                  onMouseOver={(e) => e.target.style.textDecoration = "underline"}
+                  onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                >
+                  <strong>{nom.title}</strong>
+                </a>
+                <br />
+                <span style={{ color: "#555" }}>{nom.author}</span><br />
+                <span style={{ color: "#888", fontSize: 13 }}>
+                  {nom.vote_count} vote{nom.vote_count !== 1 ? "s" : ""}
+                </span>
+              </div>
             <button onClick={() => vote(nom.id)}
               style={{ padding:"6px 14px", background:"#1565c0", color:"#fff",
                        border:"none", borderRadius:6, cursor:"pointer" }}>

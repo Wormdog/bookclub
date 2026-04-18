@@ -51,6 +51,7 @@ class RoundOut(BaseModel):
     closes_at:          datetime
     tiebreak_closes_at: Optional[datetime] = None
     status:             str
+    winner_ol_work_id:  Optional[str] = None
     winner_title:       Optional[str] = None
     winner_author:      Optional[str] = None
     winner_cover_url:   Optional[str] = None

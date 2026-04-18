@@ -53,8 +53,21 @@ export default function Results() {
                    style={{ width:80, borderRadius:4, flexShrink:0 }} />
             )}
             <div>
-              <h3 style={{ margin:"0 0 4px", color:"#1E3A5F" }}>{round.winner_title}</h3>
-              <p style={{ margin:"0 0 16px", color:"#555" }}>by {round.winner_author}</p>
+              <a 
+                  href={`https://openlibrary.org/works/${round.winner_ol_work_id}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: "none" }}
+                >
+                  <h3 
+                    style={{ margin: "0 0 4px", color: "#1E3A5F", cursor: "pointer" }}
+                    onMouseOver={(e) => e.target.style.textDecoration = "underline"}
+                    onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                  >
+                    {round.winner_title}
+                  </h3>
+                </a>
+                <p style={{ margin: "0 0 16px", color: "#555" }}>by {round.winner_author}</p>
               {round.meeting_date && (
                 <p style={{ margin:"0 0 6px" }}>
                   <strong>Next Meeting:</strong> {round.meeting_date}
