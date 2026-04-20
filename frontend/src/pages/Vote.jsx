@@ -43,41 +43,76 @@ export default function Vote() {
           )}
         </div>
       )}
-      {message && <p style={{ color:"green" }}>{message}</p>}
-      {nominations.length === 0
-        ? <p>No nominations for this round yet.</p>
-        : nominations.map((nom) => (
-          <div key={nom.id}
-            style={{ display:"flex", gap:12, alignItems:"center",
-                     border:"1px solid #ddd", borderRadius:8,
-                     padding:10, marginBottom:12 }}>
-            {nom.cover_url && <img src={nom.cover_url} alt="cover"
-              style={{ width:50, height:70, objectFit:"cover" }} />}
-            <div style={{ flex:1 }}>
-              <a 
-                  href={`https://openlibrary.org/works/${nom.ol_work_id}`} 
-                  target="_blank" 
+      {message && <p style={{ color:"red" }}>{message}</p>}
+      {nominations.length === 0 ? (
+        <p>No nominations for this round yet.</p>
+      ) : (
+        <>
+          <p style={{ marginBottom: 8, color: "#333", fontSize: 16, fontWeight: 500 }}>
+            Cast your vote below for your favorite book!
+          </p>
+          
+          <p style={{ marginBottom: 12, color: "#555", fontSize: 14 }}>
+            Tip: Click a book's title to view more details.
+          </p>
+
+          {nominations.map((nom) => (
+            <div
+              key={nom.id}
+              style={{
+                display: "flex",
+                gap: 12,
+                alignItems: "center",
+                border: "1px solid #ddd",
+                borderRadius: 8,
+                padding: 10,
+                marginBottom: 12
+              }}
+            >
+              {nom.cover_url && (
+                <img
+                  src={nom.cover_url}
+                  alt="cover"
+                  style={{ width: 50, height: 70, objectFit: "cover" }}
+                />
+              )}
+
+              <div style={{ flex: 1 }}>
+                <a
+                  href={`https://openlibrary.org/works/${nom.ol_work_id}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: "#1565c0", textDecoration: "none" }}
-                  onMouseOver={(e) => e.target.style.textDecoration = "underline"}
-                  onMouseOut={(e) => e.target.style.textDecoration = "none"}
+                  onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
+                  onMouseOut={(e) => (e.target.style.textDecoration = "none")}
                 >
                   <strong>{nom.title}</strong>
                 </a>
                 <br />
-                <span style={{ color: "#555" }}>{nom.author}</span><br />
+                <span style={{ color: "#555" }}>{nom.author}</span>
+                <br />
                 <span style={{ color: "#888", fontSize: 13 }}>
                   {nom.vote_count} vote{nom.vote_count !== 1 ? "s" : ""}
                 </span>
               </div>
-            <button onClick={() => vote(nom.id)}
-              style={{ padding:"6px 14px", background:"#1565c0", color:"#fff",
-                       border:"none", borderRadius:6, cursor:"pointer" }}>
-              Vote
-            </button>
-          </div>
-        ))
-      }
+
+              <button
+                onClick={() => vote(nom.id)}
+                style={{
+                  padding: "6px 14px",
+                  background: "#1565c0",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  cursor: "pointer"
+                }}
+              >
+                Vote
+              </button>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
