@@ -13,7 +13,8 @@ export default function Login() {
   const navigate = useNavigate();
   const reset = () => {
     setEmail(""); setUsername(""); setPassword("");
-    setConfirm(""); setInviteCode(""); setError(""); setSuccess("");
+    setConfirm(""); setInviteCode(""); setError(""); 
+    // setSuccess("");
   };
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(""); setSuccess("");
@@ -24,8 +25,9 @@ export default function Login() {
         await axios.post("/api/auth/register", {
           email, username, password, invite_code: inviteCode,
         });
+        setMode("login"); 
         setSuccess("Account created! Please check your email and click the confirmation link before logging in.");
-        setMode("login"); reset();
+        reset();
       } catch (err) {
         setError(err.response?.data?.detail || "Registration failed.");
       }
